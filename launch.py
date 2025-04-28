@@ -8,10 +8,15 @@ from crawler import Crawler
 
 def main(config_file, restart):
     cparser = ConfigParser()
+    print('a')
     cparser.read(config_file)
+    print('a')
     config = Config(cparser)
+    print('if we stop here the server is down :(')
     config.cache_server = get_cache_server(config, restart)
+    print('a')
     crawler = Crawler(config, restart)
+    print('a')
     crawler.start()
 
 

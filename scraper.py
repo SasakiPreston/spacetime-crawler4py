@@ -1,5 +1,6 @@
 import re
 from urllib.parse import urlparse
+from bs4 import BeautifulSoup
 
 def scraper(url, resp):
     links = extract_next_links(url, resp)
@@ -15,7 +16,21 @@ def extract_next_links(url, resp):
     #         resp.raw_response.url: the url, again
     #         resp.raw_response.content: the content of the page!
     # Return a list with the hyperlinks (as strings) scrapped from resp.raw_response.content
-    return list()
+
+
+
+
+    soup = BeautifulSoup(resp.raw_response.content, 'lxml')
+
+    output = []
+
+    for current in soup.find_all('a'):
+#        if'href' in current.attrs:
+        if 'href' in current.attrs and is_valid(current['href']):
+            print(current['href'])
+
+
+    return output
 
 def is_valid(url):
     # Decide whether to crawl this url or not. 
@@ -24,6 +39,8 @@ def is_valid(url):
     try:
         parsed = urlparse(url)
         if parsed.scheme not in set(["http", "https"]):
+            return False
+        elif re.search(r"\d{4}-\d{2}", s): # blacklist calendar sites
             return False
         return not re.match(
             r".*\.(css|js|bmp|gif|jpe?g|ico"
