@@ -1,12 +1,17 @@
 import re
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
+from typing import List
 
-def scraper(url, resp):
-    links = extract_next_links(url, resp)
-    return [link for link in links if is_valid(link)]
+def scraper(url, resp, soup:BeautifulSoup):
+    #links = extract_next_links(url, resp, soup)
+    #return [link for link in links if is_valid(link)]
+    if soup != None:
+        return extract_next_links(url, resp, soup)
+    else:
+        return []
 
-def extract_next_links(url, resp):
+def extract_next_links(url:str, resp, soup:BeautifulSoup) -> List[str]:
     # Implementation required.
     # url: the URL that was used to get the page
     # resp.url: the actual url of the page
@@ -17,17 +22,15 @@ def extract_next_links(url, resp):
     #         resp.raw_response.content: the content of the page!
     # Return a list with the hyperlinks (as strings) scrapped from resp.raw_response.content
 
-
-
-
-    soup = BeautifulSoup(resp.raw_response.content, 'lxml')
-
     output = []
 
     for current in soup.find_all('a'):
 #        if'href' in current.attrs:
         if 'href' in current.attrs and is_valid(current['href']):
-            print(current['href'])
+            #print(current['href'])
+            parsed = urlparse(current['href'])._replace(fragment='')
+            output.append(parsed.geturl())
+
 
 
     return output
@@ -40,7 +43,9 @@ def is_valid(url):
         parsed = urlparse(url)
         if parsed.scheme not in set(["http", "https"]):
             return False
-        elif re.search(r"\d{4}-\d{2}", s): # blacklist calendar sites
+        elif 'uci.edu' not in parsed.netloc:
+            return False
+        elif re.search(r"\d{4}-\d{2}", url): # blacklist calendar sites
             return False
         return not re.match(
             r".*\.(css|js|bmp|gif|jpe?g|ico"
