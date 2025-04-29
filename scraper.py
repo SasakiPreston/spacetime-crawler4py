@@ -47,20 +47,30 @@ def is_valid(url):
             return False
         elif 'replay.uci.edu' in parsed.netloc: # retired video server
             return False
-        elif re.search(r"\d{4}-\d{2}", url): # blacklist calendar sites
+        elif 'swiki' in parsed.netloc:
             return False
-        elif 'action=' in parsed.query: # crawler can't take an action(like login or edit a site)
+        elif 'canvas.eee.uci.edu' in parsed.netloc: # no permission to access canvas course pages
+            return False
+        elif re.search(r'\d{4}-\d{2}', url): # blacklist calendar sites
+            return False
+        elif 'ical' in parsed.query:
+            return False
+        elif re.search(r'\d{4}-week', url): # wics recommended event pages
+            return False
+        elif ''
+        elif 'action=' in parsed.query or 'share=' in parsed.query: # crawler can't take an action(like login or edit a site)
             return False
         return not re.match( 
             r".*\.(css|js|bmp|gif|jpe?g|ico"
             + r"|png|tiff?|mid|mp2|mp3|mp4"
-            + r"|wav|avi|mov|mpeg|ram|m4v|mkv|ogg|ogv|pdf|php"
+            + r"|wav|avi|mov|mpeg|ram|m4v|mkv|ogg|ogv|pdf|php|sql"
             + r"|ps|eps|tex|ppt|pptx|doc|docx|xls|xlsx|names"
             + r"|data|dat|exe|bz2|tar|msi|bin|7z|psd|dmg|iso"
             + r"|epub|dll|cnf|tgz|sha1"
             + r"|thmx|mso|arff|rtf|jar|csv"
             + r"|rm|smil|wmv|swf|wma|zip|rar|gz)$", parsed.path.lower())
-
+    except ValueError:
+        return False
     except TypeError:
         print ("TypeError for ", parsed)
         raise

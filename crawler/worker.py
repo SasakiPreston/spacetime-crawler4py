@@ -12,6 +12,9 @@ from bs4 import BeautifulSoup
 from urllib.parse import urlparse
 from itertools import islice
 
+import os
+import json
+
 
 class Worker(Thread):
     def __init__(self, worker_id, config, frontier):
@@ -21,9 +24,12 @@ class Worker(Thread):
         self._uniquePages = 0
         self._longestPageLength = 0
         self._longestPageUrl = ''
-        self._stopwords = set(stopwords.words('english')) # store stopwords
         self._wordCounter = {}
         self._domains = {}
+
+        self._stopwords = set(stopwords.words('english')) # store stopwords
+
+        self._load_stats() # check if we have a previous save
 
         # basic check for requests in scraper
         assert {getsource(scraper).find(req) for req in {"from requests import", "import requests"}} == {-1}, "Do not use requests in scraper.py"
@@ -33,7 +39,7 @@ class Worker(Thread):
     def run(self):
         while 1: 
             tbd_url = self.frontier.get_tbd_url()
-            if not tbd_url or self._uniquePages > 500:# change later, just setting a testing limit
+            if not tbd_url:
                 self.logger.info("Frontier is empty. Stopping Crawler.")
                 self._final_report()
                 break
@@ -54,6 +60,33 @@ class Worker(Thread):
             self.frontier.mark_url_complete(tbd_url)
             time.sleep(self.config.time_delay)
 
+    def _load_stats(self):
+         if not os.path.exists('./Logs/statistics.json'):
+            return
+         else:
+            self.logger.info('stats save found')
+            with open('./Logs/statistics.json', 'r') as file:
+                data = json.load(file)
+
+            self._uniquePages = data['uniquePages']
+            self._longestPageLength = data['longestPageLength']
+            self._longestPageUrl = data['longestPageUrl']
+            self._wordCounter = data['wordCounter']
+            self._domains = data['domains']
+
+
+    def _save_stats(self):
+        data = {}
+        data['uniquePages'] = self._uniquePages
+        data['longestPageLength'] = self._longestPageLength
+        data['longestPageUrl'] = self._longestPageUrl
+        data['wordCounter'] = self._wordCounter
+        data['domains'] = self._domains
+        with open('./Logs/statistics.json', 'w') as file:
+            file.write(json.dumps(data))
+
+        self.logger.info('saved stats to file')
+            
 
     '''
     updates the statistics for the worker
@@ -85,8 +118,13 @@ class Worker(Thread):
         else:
             self._domains[parsed.netloc] += 1
 
+        if self._uniquePages % 50 == 0:
+            self._save_stats()
+
+    
 
     def _final_report(self):
+        self._save_stats()
         self.logger.info(f"Page {self._longestPageUrl}, longest page with length <{self._longestPageLength}>.")
         self.logger.info("WordCounts:")
         sortedDict = sorted(self._wordCounter.items(), key = lambda current:current[1], reverse=True)
