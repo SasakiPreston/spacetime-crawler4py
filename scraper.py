@@ -45,12 +45,16 @@ def is_valid(url):
             return False
         elif 'uci.edu' not in parsed.netloc:
             return False
+        elif 'replay.uci.edu' in parsed.netloc: # retired video server
+            return False
         elif re.search(r"\d{4}-\d{2}", url): # blacklist calendar sites
             return False
-        return not re.match(
+        elif 'action=' in parsed.query: # crawler can't take an action(like login or edit a site)
+            return False
+        return not re.match( 
             r".*\.(css|js|bmp|gif|jpe?g|ico"
             + r"|png|tiff?|mid|mp2|mp3|mp4"
-            + r"|wav|avi|mov|mpeg|ram|m4v|mkv|ogg|ogv|pdf"
+            + r"|wav|avi|mov|mpeg|ram|m4v|mkv|ogg|ogv|pdf|php"
             + r"|ps|eps|tex|ppt|pptx|doc|docx|xls|xlsx|names"
             + r"|data|dat|exe|bz2|tar|msi|bin|7z|psd|dmg|iso"
             + r"|epub|dll|cnf|tgz|sha1"

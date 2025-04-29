@@ -7,6 +7,8 @@ from nltk.tokenize import RegexpTokenizer
 from nltk.tokenize import word_tokenize
 from urllib.parse import urlparse
 
+from itertools import islice
+
 
 
 def matches(s):
@@ -17,9 +19,14 @@ if __name__ == '__main__':
     url = 'https://ics.uci.edu/~cs224/'
     #parsed = urlparse(url)
     #print(parsed.netloc)
-    soup = BeautifulSoup(requests.get(url).text, 'lxml')
-    for current in soup.get_text():
+   # soup = BeautifulSoup(requests.get(url).text, 'lxml')
+
+    test = {'a':3, 'b':2, 'c':5, 'd':3}
+    test = islice(sorted(test).items(), 2)
+    for current in test:
         print(current)
+    
+    #print(soup.get_text())
     #tags = soup.find_all('a')
     #for current in tags:
     #    if 'href' in current.attrs:

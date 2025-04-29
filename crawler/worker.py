@@ -10,6 +10,7 @@ from nltk.corpus import stopwords # used geeksforgeeks.com tutorial for removing
 from nltk.tokenize import RegexpTokenizer
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse
+from itertools import islice
 
 
 class Worker(Thread):
@@ -22,7 +23,7 @@ class Worker(Thread):
         self._longestPageUrl = ''
         self._stopwords = set(stopwords.words('english')) # store stopwords
         self._wordCounter = {}
-        self._domains = set()
+        self._domains = {}
 
         # basic check for requests in scraper
         assert {getsource(scraper).find(req) for req in {"from requests import", "import requests"}} == {-1}, "Do not use requests in scraper.py"
@@ -32,7 +33,7 @@ class Worker(Thread):
     def run(self):
         while 1: 
             tbd_url = self.frontier.get_tbd_url()
-            if not tbd_url or self._uniquePages > 100:# change later, just setting a testing limit
+            if not tbd_url or self._uniquePages > 500:# change later, just setting a testing limit
                 self.logger.info("Frontier is empty. Stopping Crawler.")
                 self._final_report()
                 break
@@ -64,7 +65,7 @@ class Worker(Thread):
         pageLen = 0
         for word in tokenizer.tokenize(soup.get_text()):
             word = word.lower()
-            if word not in self._stopwords:
+            if word not in self._stopwords and len(word) != 1:
                 pageLen += 1
                 if word in self._wordCounter:
                     self._wordCounter[word] += 1
@@ -78,6 +79,12 @@ class Worker(Thread):
 
         self._uniquePages += 1
 
+        parsed = urlparse(tbd_url)
+        if parsed.netloc not in self._domains:
+            self._domains[parsed.netloc] = 1
+        else:
+            self._domains[parsed.netloc] += 1
+
 
     def _final_report(self):
         self.logger.info(f"Page {self._longestPageUrl}, longest page with length <{self._longestPageLength}>.")
@@ -87,8 +94,8 @@ class Worker(Thread):
             self.logger.info(f" - {first}: {second}")
         self.logger.info(f"Unique pages: {self._uniquePages}.")
         self.logger.info("Domains:")
-        for current in self._domains:
-            self.logger.info(f" - {current}")
+        for first, second in sorted(self._domains.items()):
+            self.logger.info(f" - {first}: {second}")
 
 
 
