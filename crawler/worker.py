@@ -22,6 +22,7 @@ class Worker(Thread):
         self.config = config
         self.frontier = frontier
         self._uniquePages = 0
+        self._successfulPages = 0
         self._longestPageLength = 0
         self._longestPageUrl = ''
         self._wordCounter = {}
@@ -53,6 +54,7 @@ class Worker(Thread):
                 self._update_statistics(tbd_url, resp, soup)
             else:
                 soup = None
+            self._uniquePages += 1
             
             scraped_urls = scraper.scraper(tbd_url, resp, soup)
             for scraped_url in scraped_urls:
@@ -69,6 +71,7 @@ class Worker(Thread):
                 data = json.load(file)
 
             self._uniquePages = data['uniquePages']
+            self._successfulPages = data['successfulPages']
             self._longestPageLength = data['longestPageLength']
             self._longestPageUrl = data['longestPageUrl']
             self._wordCounter = data['wordCounter']
@@ -78,6 +81,7 @@ class Worker(Thread):
     def _save_stats(self):
         data = {}
         data['uniquePages'] = self._uniquePages
+        data['successfulPages'] = self._successfulPages
         data['longestPageLength'] = self._longestPageLength
         data['longestPageUrl'] = self._longestPageUrl
         data['wordCounter'] = self._wordCounter
@@ -110,7 +114,7 @@ class Worker(Thread):
             self._longestPageUrl = tbd_url
             self.logger.info(f"Page {tbd_url}, new longest page with length <{pageLen}>.")
 
-        self._uniquePages += 1
+        self._successfulPages += 1
 
         parsed = urlparse(tbd_url)
         if parsed.netloc not in self._domains:
@@ -118,7 +122,7 @@ class Worker(Thread):
         else:
             self._domains[parsed.netloc] += 1
 
-        if self._uniquePages % 50 == 0: 
+        if self._successfulPages % 50 == 0: 
             self._save_stats()
 
     

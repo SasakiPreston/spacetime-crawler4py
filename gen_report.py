@@ -14,7 +14,7 @@ if __name__ == '__main__':
         data = json.load(file)
 
     with open('report.txt', 'w') as writer:
-        writer.write(f'1. Number of Unique Pages: {data['uniquePages']}\n')
+        writer.write(f'1. Number of Unique Pages: {data['uniquePages']} (successful queries: {data['successfulPages']}\n')
         writer.write(f'2. Longest Page: {data['longestPageUrl']} with word count {data['longestPageLength']}\n')
         writer.write(f'3. 50 most commonly seen words:\n\n')
         gen = gen_pairs(data['wordCounter'])
