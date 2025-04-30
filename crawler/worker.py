@@ -118,7 +118,7 @@ class Worker(Thread):
         else:
             self._domains[parsed.netloc] += 1
 
-        if self._uniquePages % 50 == 0:
+        if self._uniquePages % 50 == 0: 
             self._save_stats()
 
     
@@ -126,10 +126,10 @@ class Worker(Thread):
     def _final_report(self):
         self._save_stats()
         self.logger.info(f"Page {self._longestPageUrl}, longest page with length <{self._longestPageLength}>.")
-        self.logger.info("WordCounts:")
-        sortedDict = sorted(self._wordCounter.items(), key = lambda current:current[1], reverse=True)
-        for first, second in sortedDict:
-            self.logger.info(f" - {first}: {second}")
+        #self.logger.info("WordCounts:")
+        #sortedDict = sorted(self._wordCounter.items(), key = lambda current:current[1], reverse=True)
+        #for first, second in sortedDict:
+        #    self.logger.info(f" - {first}: {second}")
         self.logger.info(f"Unique pages: {self._uniquePages}.")
         self.logger.info("Domains:")
         for first, second in sorted(self._domains.items()):

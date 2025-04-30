@@ -39,31 +39,35 @@ def is_valid(url):
     # Decide whether to crawl this url or not. 
     # If you decide to crawl it, return True; otherwise return False.
     # There are already some conditions that return False.
+    
     try:
         parsed = urlparse(url)
         if parsed.scheme not in set(["http", "https"]):
             return False
-        elif 'uci.edu' not in parsed.netloc:
-            return False
-        elif 'replay.uci.edu' in parsed.netloc: # retired video server
-            return False
+        #elif 'uci.edu' not in parsed.netloc:
+            #return False
+        #elif 'replay.uci.edu' in parsed.netloc: # retired video server
+            #return False
         elif 'swiki' in parsed.netloc:
             return False
-        elif 'canvas.eee.uci.edu' in parsed.netloc: # no permission to access canvas course pages
+        #elif 'canvas.eee.uci.edu' in parsed.netloc: # no permission to access canvas course pages
+            #return False
+        elif not check_domain(parsed):
             return False
         elif re.search(r'\d{4}-\d{2}', url): # blacklist calendar sites
             return False
         elif 'ical' in parsed.query:
             return False
-        elif re.search(r'\d{4}-week', url): # wics recommended event pages
-            return False
-        elif ''
+        #elif re.search(r'\d{4}-week', url): # wics recommended event pages
+        #    return False
+        #elif 'wics.ics.uci.edu/event' in url:
+        #    return False
         elif 'action=' in parsed.query or 'share=' in parsed.query: # crawler can't take an action(like login or edit a site)
             return False
         return not re.match( 
             r".*\.(css|js|bmp|gif|jpe?g|ico"
             + r"|png|tiff?|mid|mp2|mp3|mp4"
-            + r"|wav|avi|mov|mpeg|ram|m4v|mkv|ogg|ogv|pdf|php|sql"
+            + r"|wav|avi|mov|mpeg|ram|m4v|mkv|ogg|ogv|pdf|php|sql|apk|bib|odc|sas"
             + r"|ps|eps|tex|ppt|pptx|doc|docx|xls|xlsx|names"
             + r"|data|dat|exe|bz2|tar|msi|bin|7z|psd|dmg|iso"
             + r"|epub|dll|cnf|tgz|sha1"
@@ -74,3 +78,13 @@ def is_valid(url):
     except TypeError:
         print ("TypeError for ", parsed)
         raise
+
+
+def check_domain(parsed):
+    domains = {'ics.uci.edu', 'cs.uci.edu', 'informatics.uci.edu', 'stat.uci.edu', 'today.uci.edu/department/information_computer_sciences'}
+    
+    for current in domains:
+        if current in parsed.netloc:
+            return True
+
+    return False
