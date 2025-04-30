@@ -82,9 +82,25 @@ def is_valid(url):
 
 def check_domain(parsed):
     domains = {'ics.uci.edu', 'cs.uci.edu', 'informatics.uci.edu', 'stat.uci.edu', 'today.uci.edu/department/information_computer_sciences'}
+    print(parsed.netloc)
+    if re.search(r"(^|[.])(ics|cs|informatics|stat|today)([.]uci[.]edu)", parsed.netloc):
+        if 'today.uci.edu' in parsed.netloc and  '/department/information_computer_sciences' not in parsed.path:
+            return False
+        return True
     
+    return False
+
+    '''
     for current in domains:
+
+        if re.match(r'')
+
         if current in parsed.netloc:
-            return True
+            if current == 'today.uci.edu' and 'department/information_computer_science' not in parsed.path:
+                return False
+            else:
+                print(current)
+                return True
 
     return False
+    '''
